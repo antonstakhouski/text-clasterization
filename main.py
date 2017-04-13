@@ -78,7 +78,7 @@ def get_vectors(discps, glossaries, txt_in_sect):
 
 discps = ("econ", "phyl", "med")
 
-txt_in_sect = 2
+txt_in_sect = 5
 glossaries = list()
 glossaries = gloss_init(glossaries)
 
@@ -109,14 +109,14 @@ for vec in vecs:
             for d in discps:
                 sum_d += sqr(cluster[d] - vec[d])
             leng = math.sqrt(sum_d)
-            #  print(leng)
+            print("len: ", leng)
             if leng < min_len:
                 min_len = leng
                 best_cluster = discp
-    #  print(min_len)
+    print(min_len)
     clusters[best_cluster][1].append(vec)
     #  print(clusters)
-    vecs.remove(vec)
+    #  vecs.remove(vec)
 
     sum_1 = 0
     sum_2 = 0
@@ -134,5 +134,6 @@ for vec in vecs:
 
 for cluster in clusters:
     print(clusters[cluster])
+    print(len(clusters[cluster][1]))
 #  print(clusters)
-print(len(vecs))
+#  print(len(vecs))
