@@ -76,64 +76,78 @@ def get_vectors(discps, glossaries, txt_in_sect):
     return vecs
 
 
-discps = ("econ", "phyl", "med")
+def delete_centers_from_vecs(vecs, disps, clusters):
+    for vec in vecs:
+        for discp in discps:
+            if vec in clusters[discp][1]:
+                vecs.remove(vec)
 
-txt_in_sect = 5
-glossaries = list()
-glossaries = gloss_init(glossaries)
 
-vecs = get_vectors(discps, glossaries, txt_in_sect)
-clusters = {a: list() for a in discps}
-#  print(vecs)
-
-max_disc_vec = {a: vecs[0] for a in discps}
-for vec in vecs:
+def find_cluster_centers(vecs, disps, clusters):
+    max_disc_vec = {a: vecs[0] for a in discps}
+    for vec in vecs:
+        for discp in discps:
+            if vec[discp] > max_disc_vec[discp][discp]:
+                max_disc_vec[discp] = vec
     for discp in discps:
-        if vec[discp] > max_disc_vec[discp][discp]:
-            max_disc_vec[discp] = vec
-for discp in discps:
-    clusters[discp].extend([max_disc_vec[discp].copy(), [max_disc_vec[discp].copy(), ]])
+        clusters[discp].extend([max_disc_vec[discp].copy(), [max_disc_vec[discp].copy(), ]])
+    delete_centers_from_vecs(vecs, discps, clusters)
 
-for vec in vecs:
-    for discp in discps:
-        if vec in clusters[discp][1]:
-            vecs.remove(vec)
 
-for vec in vecs:
-    best_cluster = discps[0]
+def print_clusters(clusters):
+    for cluster in clusters:
+        print("Cluster: " + cluster)
+        print("Center: ", clusters[cluster][0])
+        print("Elements:")
+        for el in clusters[cluster][1]:
+            print("     ", el)
+        print("Cluster size: ", len(clusters[cluster][1]))
+        print("---------")
+        print("")
+
+
+def find_nearest_cluster(vec, discps, clusters):
+    nearest_cluster = discps[0]
     min_len = 1
-    #  search for best cluster
+    #  search for nearest cluster
     for discp in discps:
         for cluster in clusters[discp][1]:
             sum_d = 0
             for d in discps:
                 sum_d += sqr(cluster[d] - vec[d])
             leng = math.sqrt(sum_d)
-            print("len: ", leng)
+            #  print("len: ", leng)
             if leng < min_len:
                 min_len = leng
-                best_cluster = discp
-    print(min_len)
-    clusters[best_cluster][1].append(vec)
-    #  print(clusters)
-    #  vecs.remove(vec)
+                nearest_cluster = discp
+    #  print(min_len)
+    return nearest_cluster
 
-    sum_1 = 0
-    sum_2 = 0
-    sum_3 = 0
-    for el in clusters[best_cluster][1]:
-        sum_1 += el[discps[0]]
-        sum_2 += el[discps[1]]
-        sum_3 += el[discps[2]]
-    #  print(sum_1)
 
-    clusters[best_cluster][0][discps[0]] = sum_1 / len(clusters[best_cluster][1])
-    clusters[best_cluster][0][discps[1]] = sum_2 / len(clusters[best_cluster][1])
-    clusters[best_cluster][0][discps[2]] = sum_3 / len(clusters[best_cluster][1])
-    #  print(clusters)
+def make_clusterization(vecs, discps, clusters):
+    for vec in vecs:
+        nearest_cluster = find_nearest_cluster(vec, discps, clusters)
+        clusters[nearest_cluster][1].append(vec)
 
-for cluster in clusters:
-    print(clusters[cluster])
-    print(len(clusters[cluster][1]))
-#  print(clusters)
-#  print(len(vecs))
+        sum_vec = [0 for _ in discps]
+        for el in clusters[nearest_cluster][1]:
+            for sum_el in range(0, len(discps)):
+                sum_vec[sum_el] += el[discps[sum_el]]
+        for el in range(0, len(discps)):
+            clusters[nearest_cluster][0][discps[el]] = sum_vec[el] / len(clusters[nearest_cluster][1])
+
+
+if __name__ == "__main__":
+    discps = ("econ", "phyl", "med")
+
+    txt_in_sect = 5
+    glossaries = list()
+    glossaries = gloss_init(glossaries)
+
+    vecs = get_vectors(discps, glossaries, txt_in_sect)
+    clusters = {a: list() for a in discps}
+
+    find_cluster_centers(vecs, discps, clusters)
+    make_clusterization(vecs, discps, clusters)
+
+    print_clusters(clusters)
