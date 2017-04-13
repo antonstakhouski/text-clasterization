@@ -137,6 +137,27 @@ def make_clusterization(vecs, discps, clusters):
             clusters[nearest_cluster][0][discps[el]] = sum_vec[el] / len(clusters[nearest_cluster][1])
 
 
+def make_clusterization2(vecs, discps, clusters):
+    for vec in vecs:
+        nearest_cluster = find_nearest_cluster(vec, discps, clusters)
+        clusters[nearest_cluster][1].append(vec)
+
+        sum_vec = [list() for _ in discps]
+        for el in clusters[nearest_cluster][1]:
+            for sum_el in range(0, len(discps)):
+                sum_vec[sum_el].append(el[discps[sum_el]])
+        for el in range(0, len(discps)):
+            #  print(el)
+            clu_len = len(clusters[nearest_cluster][1])
+            #  print(clu_len)
+            sum_vec[el].sort()
+            if clu_len % 2 == 0:
+                clusters[nearest_cluster][0][discps[el]] = \
+                        (sum_vec[el][clu_len // 2] + sum_vec[el][clu_len // 2 - 1]) / 2
+            else:
+                clusters[nearest_cluster][0][discps[el]] = sum_vec[el][clu_len // 2]
+
+
 if __name__ == "__main__":
     discps = ("econ", "phyl", "med")
 
@@ -149,5 +170,13 @@ if __name__ == "__main__":
 
     find_cluster_centers(vecs, discps, clusters)
     make_clusterization(vecs, discps, clusters)
+
+    print_clusters(clusters)
+
+    vecs = get_vectors(discps, glossaries, txt_in_sect)
+    clusters = {a: list() for a in discps}
+
+    find_cluster_centers(vecs, discps, clusters)
+    make_clusterization2(vecs, discps, clusters)
 
     print_clusters(clusters)
