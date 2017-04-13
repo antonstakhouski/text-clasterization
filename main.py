@@ -92,34 +92,47 @@ for vec in vecs:
         if vec[discp] > max_disc_vec[discp][discp]:
             max_disc_vec[discp] = vec
 for discp in discps:
-    clusters[discp].extend([max_disc_vec[discp], [max_disc_vec[discp], ]])
+    clusters[discp].extend([max_disc_vec[discp].copy(), [max_disc_vec[discp].copy(), ]])
 
 for vec in vecs:
     for discp in discps:
         if vec in clusters[discp][1]:
             vecs.remove(vec)
 
-#  for vec in vecs:
-#      best_cluster = discps[0]
-#      min_len = 1
-#      for discp in discps:
-#          sum_d = 0
-#          for d in discps:
-#              sum_d += sqr(clusters[discp][1] - vec[d])
-#          leng = math.sqrt(sum_d)
-#          if leng < min_len:
-#              min_len = leng
-#              best_cluster = d
+for vec in vecs:
+    best_cluster = discps[0]
+    min_len = 1
+    #  search for best cluster
+    for discp in discps:
+        for cluster in clusters[discp][1]:
+            sum_d = 0
+            for d in discps:
+                sum_d += sqr(cluster[d] - vec[d])
+            leng = math.sqrt(sum_d)
+            #  print(leng)
+            if leng < min_len:
+                min_len = leng
+                best_cluster = discp
+    #  print(min_len)
+    clusters[best_cluster][1].append(vec)
+    #  print(clusters)
+    vecs.remove(vec)
 
-    #  clusters[best_cluster][0].append(vec)
-    #  center = clusters[best_cluster][1]
-    #  for el in clusters[best_cluster][0]:
-    #      sum_f = 0
-    #      for d in discps:
-    #          sum_fclusters[best_cluster][0][d]
+    sum_1 = 0
+    sum_2 = 0
+    sum_3 = 0
+    for el in clusters[best_cluster][1]:
+        sum_1 += el[discps[0]]
+        sum_2 += el[discps[1]]
+        sum_3 += el[discps[2]]
+    #  print(sum_1)
 
-    #  vecs.remove(vec)
+    clusters[best_cluster][0][discps[0]] = sum_1 / len(clusters[best_cluster][1])
+    clusters[best_cluster][0][discps[1]] = sum_2 / len(clusters[best_cluster][1])
+    clusters[best_cluster][0][discps[2]] = sum_3 / len(clusters[best_cluster][1])
+    #  print(clusters)
 
-
-print(clusters)
+for cluster in clusters:
+    print(clusters[cluster])
+#  print(clusters)
 print(len(vecs))
